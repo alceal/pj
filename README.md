@@ -27,8 +27,7 @@ command.
 ### Homebrew
 
 ```bash
-brew tap alceal/tap
-brew install pj
+brew install alceal/tap/pj
 ```
 
 ### Cargo
