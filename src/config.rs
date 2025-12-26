@@ -8,6 +8,8 @@ pub struct Config {
     pub editor: String,
     pub cd_on_select: bool,
     pub git_init_on_add: bool,
+    #[serde(default)]
+    pub gh_create_on_add: bool,
 }
 
 impl Default for Config {
@@ -16,6 +18,7 @@ impl Default for Config {
             editor: "code".to_string(),
             cd_on_select: true,
             git_init_on_add: true,
+            gh_create_on_add: false,
         }
     }
 }
@@ -43,7 +46,16 @@ impl Config {
             .with_context(|| format!("Failed to read config file: {}", path.display()))?;
         let config: Config =
             toml::from_str(&content).with_context(|| "Failed to parse config file")?;
+        config.validate_and_warn();
         Ok(config)
+    }
+
+    fn validate_and_warn(&self) {
+        if self.gh_create_on_add && !self.git_init_on_add {
+            eprintln!("Warning: gh_create_on_add is enabled but git_init_on_add is disabled.");
+            eprintln!("GitHub remote creation requires git initialization. Enable git_init_on_add");
+            eprintln!("in ~/.pj/config.toml or disable gh_create_on_add.");
+        }
     }
 
     pub fn save(&self) -> Result<()> {

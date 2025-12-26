@@ -35,17 +35,39 @@ pub fn run() -> Result<()> {
         .interact()?
         == 0;
 
-    let git_init_on_add = Select::new()
+    let mut git_init_on_add = Select::new()
         .with_prompt("Initialize git repo when adding projects?")
         .items(&["yes", "no"])
         .default(0)
         .interact()?
         == 0;
 
+    let existing_config = Config::load().ok();
+    let should_ask_github =
+        git_init_on_add || existing_config.map_or(false, |c| c.git_init_on_add);
+
+    let gh_create_on_add = if should_ask_github {
+        Select::new()
+            .with_prompt("Create GitHub remote when adding a project? (requires gh CLI)")
+            .items(&["yes", "no"])
+            .default(1)
+            .interact()?
+            == 0
+    } else {
+        false
+    };
+
+    if gh_create_on_add && !git_init_on_add {
+        eprintln!("Warning: GitHub remote creation requires git initialization.");
+        eprintln!("Enabling git_init_on_add automatically.");
+        git_init_on_add = true;
+    }
+
     let config = Config {
         editor,
         cd_on_select,
         git_init_on_add,
+        gh_create_on_add,
     };
 
     config.save()?;

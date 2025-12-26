@@ -4,6 +4,7 @@ use std::path::PathBuf;
 use std::process::Command;
 
 use crate::config::Config;
+use crate::github::create_github_remote_if_possible;
 use crate::projects::{Project, ProjectStore};
 
 fn is_git_repo(path: &PathBuf) -> bool {
@@ -51,6 +52,10 @@ pub fn run(tags: Option<String>) -> Result<()> {
             if git_init(&canonical_path)? {
                 eprintln!("Initialized git repository");
             }
+        }
+
+        if config.gh_create_on_add {
+            create_github_remote_if_possible(&canonical_path)?;
         }
     } else {
         eprintln!(

@@ -1,6 +1,7 @@
 mod commands;
 mod config;
 mod frecency;
+mod github;
 mod projects;
 mod shell;
 mod tui;
