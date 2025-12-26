@@ -2,9 +2,11 @@ use anyhow::Result;
 use dialoguer::{Input, Select};
 
 use crate::config::Config;
+use crate::github::is_gh_installed;
 use crate::shell::Shell;
 
 pub fn run() -> Result<()> {
+    let existing_config = Config::load().ok();
     let shell = Shell::detect();
 
     if let Some(s) = &shell {
@@ -42,13 +44,17 @@ pub fn run() -> Result<()> {
         .interact()?
         == 0;
 
-    let existing_config = Config::load().ok();
     let should_ask_github =
-        git_init_on_add || existing_config.map_or(false, |c| c.git_init_on_add);
+        git_init_on_add || existing_config.as_ref().map_or(false, |c| c.git_init_on_add);
 
     let gh_create_on_add = if should_ask_github {
+        let gh_hint = if is_gh_installed() {
+            "Create GitHub remote when adding a project?"
+        } else {
+            "Create GitHub remote when adding a project? (gh CLI not installed)"
+        };
         Select::new()
-            .with_prompt("Create GitHub remote when adding a project? (requires gh CLI)")
+            .with_prompt(gh_hint)
             .items(&["yes", "no"])
             .default(1)
             .interact()?
