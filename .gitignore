@@ -1,2 +1,7 @@
 /target
 /specs
+CLAUDE.md
+.DS_Store
+*.swp
+*.swo
+.env
