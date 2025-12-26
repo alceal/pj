@@ -8,9 +8,9 @@
     </a>
 </p>
 
-A fast, terminal-based project launcher with fuzzy matching and frecency-based
-ranking. Quickly navigate between projects, organize them with tags, and launch
-your editor with a single command.
+A fast, terminal-based project launcher with fuzzy matching. Quickly navigate
+between projects, organize them with tags, and launch your editor with a single
+command.
 
 ## Features
 
