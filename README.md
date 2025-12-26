@@ -1,8 +1,8 @@
 # pj
 
 <p align="center">
-    <a href="https://crates.io/crates/pj">
-    <img alt="Crates.io" src="https://img.shields.io/crates/v/pj.svg"></a>
+    <a href="https://crates.io/crates/pj-cli">
+    <img alt="Crates.io" src="https://img.shields.io/crates/v/pj-cli.svg"></a>
     <a href="https://github.com/alceal/pj/blob/main/LICENSE.txt">
     <img alt="License" src="https://img.shields.io/badge/license-MIT-blue.svg">
     </a>
@@ -34,7 +34,7 @@ brew install pj
 ### Cargo
 
 ```bash
-cargo install pj
+cargo install pj-cli
 ```
 
 ### From Source
