@@ -1,5 +1,5 @@
 [package]
-name = "pj"
+name = "pj-cli"
 version = "0.1.0"
 edition = "2021"
 authors = ["Alberto Cebada Aleu <contact@albertocebada.com>"]
@@ -10,6 +10,10 @@ repository = "https://github.com/alceal/pj"
 license = "MIT"
 keywords = ["cli", "project", "launcher", "fuzzy", "productivity"]
 categories = ["command-line-utilities", "development-tools"]
+
+[[bin]]
+name = "pj"
+path = "src/main.rs"
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }
