@@ -56,9 +56,9 @@ pj() {
     local result
     result=$(command pj "$@")
     local exit_code=$?
-    if [[ $exit_code -eq 0 && -n "$result" ]]; then
-        cd "$result"
-    elif [[ $exit_code -ne 130 ]]; then
+    if [[ $exit_code -eq 0 && -d "$result" ]]; then
+        builtin cd "$result"
+    elif [[ $exit_code -ne 130 && -n "$result" ]]; then
         echo "$result"
     fi
 }
@@ -70,9 +70,9 @@ pj() {
 pj() {
     result=$(command pj "$@")
     exit_code=$?
-    if [ $exit_code -eq 0 ] && [ -n "$result" ]; then
+    if [ $exit_code -eq 0 ] && [ -d "$result" ]; then
         cd "$result"
-    elif [ $exit_code -ne 130 ]; then
+    elif [ $exit_code -ne 130 ] && [ -n "$result" ]; then
         echo "$result"
     fi
 }
@@ -84,9 +84,9 @@ pj() {
 function pj
     set -l result (command pj $argv)
     set -l exit_code $status
-    if test $exit_code -eq 0 -a -n "$result"
+    if test $exit_code -eq 0 -a -d "$result"
         cd $result
-    else if test $exit_code -ne 130
+    else if test $exit_code -ne 130 -a -n "$result"
         echo $result
     end
 end
