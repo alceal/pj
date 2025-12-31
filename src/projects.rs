@@ -48,13 +48,6 @@ impl Project {
         self.tags.retain(|t| !tags_lower.contains(t));
     }
 
-    pub fn matches_tag_filter(&self, filter_tag: &str) -> bool {
-        let filter_lower = filter_tag.to_lowercase();
-        self.tags.iter().any(|tag| {
-            tag == &filter_lower || tag.starts_with(&format!("{}/", filter_lower))
-        })
-    }
-
     pub fn exists(&self) -> bool {
         self.path.exists()
     }
@@ -125,16 +118,6 @@ impl ProjectStore {
         let len_before = self.projects.len();
         self.projects.retain(|p| p.path.exists());
         len_before - self.projects.len()
-    }
-
-    pub fn filter_by_tags(&self, tags: &[String]) -> Vec<&Project> {
-        if tags.is_empty() {
-            return self.projects.iter().collect();
-        }
-        self.projects
-            .iter()
-            .filter(|p| tags.iter().any(|t| p.matches_tag_filter(t)))
-            .collect()
     }
 
     pub fn sorted_by_frecency(&self) -> Vec<&Project> {

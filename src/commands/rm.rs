@@ -1,8 +1,7 @@
 use anyhow::{bail, Result};
-use std::env;
 
 use crate::projects::ProjectStore;
-use crate::tui::{select_project_for_removal, SelectionResult};
+use crate::tui::{select_projects_multi, SelectionResult};
 
 pub fn run(missing: bool) -> Result<()> {
     let mut store = ProjectStore::load()?;
@@ -23,9 +22,19 @@ pub fn run(missing: bool) -> Result<()> {
         bail!("No projects tracked. Add a project with: pj -a");
     }
 
-    let current_dir = env::current_dir().ok().and_then(|p| p.canonicalize().ok());
-
-    match select_project_for_removal(&projects, current_dir.as_ref())? {
+    match select_projects_multi(&projects)? {
+        SelectionResult::MultiSelected(paths) => {
+            let mut removed_count = 0;
+            for path in &paths {
+                if store.remove(path) {
+                    eprintln!("Removed: {}", path.display());
+                    removed_count += 1;
+                }
+            }
+            if removed_count > 0 {
+                store.save()?;
+            }
+        }
         SelectionResult::Selected(path) | SelectionResult::MissingSelected(path) => {
             if store.remove(&path) {
                 eprintln!("Removed: {}", path.display());

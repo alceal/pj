@@ -16,20 +16,10 @@ struct ProjectRow {
     last_accessed: String,
 }
 
-pub fn run(tags: Option<String>) -> Result<()> {
+pub fn run() -> Result<()> {
     let store = ProjectStore::load()?;
 
-    let filter_tags: Vec<String> = tags
-        .map(|t| t.split(',').map(|s| s.trim().to_lowercase()).collect())
-        .unwrap_or_default();
-
-    let projects = if filter_tags.is_empty() {
-        store.sorted_by_frecency()
-    } else {
-        let mut filtered = store.filter_by_tags(&filter_tags);
-        filtered.sort_by(|a, b| b.frecency().partial_cmp(&a.frecency()).unwrap());
-        filtered
-    };
+    let projects = store.sorted_by_frecency();
 
     if projects.is_empty() {
         eprintln!("No projects found");
