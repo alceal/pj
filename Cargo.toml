@@ -1,6 +1,6 @@
 [package]
 name = "pj-cli"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 authors = ["Alberto Cebada Aleu <contact@albertocebada.com>"]
 description = "Project launcher CLI with fuzzy matching"
