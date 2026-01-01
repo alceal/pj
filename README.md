@@ -49,7 +49,7 @@ cargo install --path .
 Run the interactive setup wizard:
 
 ```bash
-pj init
+pj --init
 ```
 
 This will configure your shell, editor, and preferences. The wizard detects
@@ -74,18 +74,22 @@ pj
 | Command | Description |
 |---------|-------------|
 | `pj` | Open interactive project selector |
-| `pj init` | Run the setup wizard |
-| `pj -a` | Add current directory as a project |
-| `pj list` | Display all tracked projects |
-| `pj tag` | Manage project tags |
-| `pj rm` | Remove projects from tracking |
+| `pj <filter>` | Filter projects by terms (auto-selects if single match) |
+| `pj --init` | Run the setup wizard |
+| `pj --config` | Interactive configuration editor |
+| `pj --list` | Display all tracked projects |
+| `pj -a` / `pj --add` | Add current directory as a project |
+| `pj --rm` | Remove projects interactively |
+| `pj --rm-missing` | Remove all projects with missing paths |
 
 ### Options
 
 | Option | Description |
 |--------|-------------|
-| `-t, --tags <TAGS>` | Filter by tags or add tags when using `-a` |
+| `-t, --tags <TAGS>` | Add tags to project(s) or filter when adding |
+| `--rm-tags <TAGS>` | Remove tags from project(s) |
 | `-e, --editor <EDITOR>` | Override the configured editor |
+| `--no-editor` | Skip opening editor (just cd if enabled) |
 | `--cd` / `--no-cd` | Override directory change behavior |
 
 ### Examples
@@ -94,17 +98,21 @@ pj
 # Add project with multiple tags
 pj -a -t work/backend,rust,api
 
-# Filter projects by tag
-pj -t work
-
-# List projects with a specific tag
-pj list -t rust
+# Filter projects by name (auto-selects if single match)
+pj rust
+pj my-project
 
 # Open project with a different editor
 pj -e zed
 
+# List all tracked projects
+pj --list
+
 # Remove all projects with missing paths
-pj rm --missing
+pj --rm-missing
+
+# Edit configuration interactively
+pj --config
 ```
 
 ## Configuration
@@ -139,9 +147,9 @@ Tags support hierarchical organization using `/` as a separator:
 # Add with hierarchical tags
 pj -a -t work/frontend/dashboard
 
-# Filter matches parent and all children
-pj -t work           # Matches work, work/frontend, work/frontend/dashboard
-pj -t work/frontend  # Matches work/frontend and work/frontend/dashboard
+# Filter by tag in selection
+pj work           # Fuzzy matches against path and tags
+pj work/frontend  # More specific filter
 ```
 
 ## License
