@@ -60,8 +60,12 @@ struct Cli {
     init: bool,
 
     /// List all tracked projects (table output)
-    #[arg(long = "list", conflicts_with_all = ["add", "rm", "rm_missing", "init"])]
+    #[arg(long = "list", conflicts_with_all = ["add", "rm", "rm_missing", "init", "config"])]
     list: bool,
+
+    /// Show current configuration
+    #[arg(long = "config", conflicts_with_all = ["add", "rm", "rm_missing", "init", "list", "tags", "rm_tags"])]
+    config: bool,
 }
 
 fn main() {
@@ -69,6 +73,8 @@ fn main() {
 
     let result = if cli.init {
         commands::init::run()
+    } else if cli.config {
+        commands::show_config::run()
     } else if cli.list {
         commands::list::run()
     } else if cli.rm {

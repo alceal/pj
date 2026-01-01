@@ -118,7 +118,7 @@ pub fn select_project(
         .collect();
 
     let mut options_builder = SkimOptionsBuilder::default();
-    options_builder.height(Some("50%")).multi(false);
+    options_builder.height(Some("100%")).multi(false);
 
     if let Some(q) = query {
         options_builder.query(Some(q));
@@ -161,8 +161,9 @@ pub fn select_projects_multi(projects: &[&Project]) -> Result<SelectionResult> {
         .collect();
 
     let options = SkimOptionsBuilder::default()
-        .height(Some("50%"))
+        .height(Some("100%"))
         .multi(true)
+        .header(Some("Tab: select | Enter: confirm | Esc: cancel"))
         .build()
         .unwrap();
 

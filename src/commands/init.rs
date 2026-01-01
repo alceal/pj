@@ -15,12 +15,19 @@ pub fn run() -> Result<()> {
         eprintln!("Could not detect shell, defaulting to bash-compatible");
     }
 
-    let editor_options = vec!["code", "zed", "cursor", "nvim", "vim", "other"];
-    let editor_selection = Select::new()
-        .with_prompt("Which editor would you like to use?")
+    let editor_options = vec!["none", "code", "zed", "cursor", "nvim", "vim", "nano", "emacs", "other"];
+    let editor_selection = match Select::new()
+        .with_prompt("Which editor would you like to use? (Esc to cancel)")
         .items(&editor_options)
-        .default(0)
-        .interact()?;
+        .default(1)
+        .interact_opt()?
+    {
+        Some(sel) => sel,
+        None => {
+            eprintln!("Setup cancelled.");
+            return Ok(());
+        }
+    };
 
     let editor = if editor_selection == editor_options.len() - 1 {
         Input::<String>::new()
@@ -30,19 +37,31 @@ pub fn run() -> Result<()> {
         editor_options[editor_selection].to_string()
     };
 
-    let cd_on_select = Select::new()
+    let cd_on_select = match Select::new()
         .with_prompt("Change directory when selecting a project?")
         .items(&["yes", "no"])
         .default(0)
-        .interact()?
-        == 0;
+        .interact_opt()?
+    {
+        Some(sel) => sel == 0,
+        None => {
+            eprintln!("Setup cancelled.");
+            return Ok(());
+        }
+    };
 
-    let mut git_init_on_add = Select::new()
+    let mut git_init_on_add = match Select::new()
         .with_prompt("Initialize git repo when adding projects?")
         .items(&["yes", "no"])
         .default(0)
-        .interact()?
-        == 0;
+        .interact_opt()?
+    {
+        Some(sel) => sel == 0,
+        None => {
+            eprintln!("Setup cancelled.");
+            return Ok(());
+        }
+    };
 
     let should_ask_github =
         git_init_on_add || existing_config.as_ref().map_or(false, |c| c.git_init_on_add);
@@ -53,12 +72,18 @@ pub fn run() -> Result<()> {
         } else {
             "Create GitHub remote when adding a project? (gh CLI not installed)"
         };
-        Select::new()
+        match Select::new()
             .with_prompt(gh_hint)
             .items(&["yes", "no"])
             .default(1)
-            .interact()?
-            == 0
+            .interact_opt()?
+        {
+            Some(sel) => sel == 0,
+            None => {
+                eprintln!("Setup cancelled.");
+                return Ok(());
+            }
+        }
     } else {
         false
     };

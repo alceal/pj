@@ -26,3 +26,4 @@ chrono = { version = "0.4", features = ["serde"] }
 tabled = "0.17"
 dialoguer = { version = "0.11", features = ["completion"] }
 anyhow = "1"
+crossterm = "0.28"
