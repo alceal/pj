@@ -53,6 +53,12 @@ impl Shell {
                 r#"
 # pj - Project Launcher shell integration
 pj() {
+    case "$1" in
+        -a|--add|-i|--init|--config|-h|--help|-V|--version)
+            command pj "$@"
+            return $?
+            ;;
+    esac
     local result
     result=$(command pj "$@")
     local exit_code=$?
@@ -68,6 +74,12 @@ pj() {
                 r#"
 # pj - Project Launcher shell integration
 pj() {
+    case "$1" in
+        -a|--add|-i|--init|--config|-h|--help|-V|--version)
+            command pj "$@"
+            return $?
+            ;;
+    esac
     result=$(command pj "$@")
     exit_code=$?
     if [ $exit_code -eq 0 ] && [ -d "$result" ]; then
@@ -82,6 +94,11 @@ pj() {
                 r#"
 # pj - Project Launcher shell integration
 function pj
+    switch $argv[1]
+        case -a --add -i --init --config -h --help -V --version
+            command pj $argv
+            return $status
+    end
     set -l result (command pj $argv)
     set -l exit_code $status
     if test $exit_code -eq 0 -a -d "$result"

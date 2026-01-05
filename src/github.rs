@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Result};
+use dialoguer::console::Term;
 use dialoguer::Select;
-use std::io::IsTerminal;
 use std::path::Path;
 use std::process::{Command, Stdio};
 
@@ -8,10 +8,6 @@ use std::process::{Command, Stdio};
 pub enum Visibility {
     Public,
     Private,
-}
-
-pub fn is_interactive() -> bool {
-    std::io::stdin().is_terminal() && std::io::stdout().is_terminal()
 }
 
 pub fn is_gh_installed() -> bool {
@@ -51,7 +47,7 @@ pub fn prompt_visibility() -> Result<Visibility> {
         .with_prompt("Repository visibility")
         .items(&items)
         .default(1)
-        .interact()?;
+        .interact_on(&Term::stderr())?;
 
     Ok(match selection {
         0 => Visibility::Public,
@@ -97,10 +93,6 @@ pub fn create_github_repo(path: &Path, visibility: Visibility) -> Result<()> {
 }
 
 pub fn create_github_remote_if_possible(path: &Path) -> Result<()> {
-    if !is_interactive() {
-        return Ok(());
-    }
-
     if !is_gh_installed() {
         eprintln!("Warning: gh CLI not found. Install from https://cli.github.com");
         eprintln!("         to enable GitHub integration.");
