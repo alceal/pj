@@ -77,7 +77,7 @@ pj
 | `pj <filter>` | Filter projects by terms (auto-selects if single match) |
 | `pj --init` | Run the setup wizard |
 | `pj --config` | Interactive configuration editor |
-| `pj --list` | Display all tracked projects |
+| `pj --list` | Display all tracked projects with status |
 | `pj -a` / `pj --add` | Add current directory as a project |
 | `pj --rm` | Remove projects interactively |
 | `pj --rm-missing` | Remove all projects with missing paths |

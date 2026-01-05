@@ -14,6 +14,8 @@ struct ProjectRow {
     access_count: u32,
     #[tabled(rename = "LAST ACCESSED")]
     last_accessed: String,
+    #[tabled(rename = "STATUS")]
+    status: String,
 }
 
 pub fn run() -> Result<()> {
@@ -38,6 +40,11 @@ pub fn run() -> Result<()> {
                 tags: p.tags.join(", "),
                 access_count: p.access_count,
                 last_accessed: dt,
+                status: if p.exists() {
+                    "OK".to_string()
+                } else {
+                    "MISSING".to_string()
+                },
             }
         })
         .collect();
