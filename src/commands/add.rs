@@ -1,4 +1,5 @@
 use anyhow::{Context, Result};
+use dialoguer::Confirm;
 use std::env;
 use std::path::PathBuf;
 use std::process::Command;
@@ -49,7 +50,12 @@ pub fn run(tags: Option<String>) -> Result<()> {
         eprintln!("Added: {}", canonical_path.display());
 
         if config.git_init_on_add && !is_git_repo(&canonical_path) {
-            if git_init(&canonical_path)? {
+            let should_init = Confirm::new()
+                .with_prompt("Initialize git repository?")
+                .default(true)
+                .interact()?;
+
+            if should_init && git_init(&canonical_path)? {
                 eprintln!("Initialized git repository");
             }
         }

@@ -19,7 +19,7 @@ command.
 - **Hierarchical Tags**: Organize projects with nested tags (e.g., `work/backend`)
 - **Shell Integration**: Automatic directory changing for bash, zsh, fish, and sh
 - **Editor Integration**: Launch your preferred editor when selecting a project
-- **Git Integration**: Auto-initialize git repositories when adding projects
+- **Git Integration**: Prompt to initialize git repositories when adding projects
 - **GitHub Integration**: Optionally create GitHub remotes via the gh CLI
 
 ## Installation
@@ -122,7 +122,7 @@ Configuration is stored in `~/.pj/config.toml`:
 ```toml
 editor = "code"           # Editor command to launch
 cd_on_select = true       # Change directory when selecting a project
-git_init_on_add = true    # Initialize git when adding a project
+git_init_on_add = true    # Prompt to initialize git when adding a project
 gh_create_on_add = false  # Create GitHub remote when adding (requires gh CLI)
 ```
 
