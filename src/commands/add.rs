@@ -60,7 +60,7 @@ pub fn run(tags: Option<String>) -> Result<()> {
             }
         }
 
-        if config.gh_create_on_add {
+        if config.gh_create_on_add && is_git_repo(&canonical_path) {
             create_github_remote_if_possible(&canonical_path)?;
         }
     } else {
