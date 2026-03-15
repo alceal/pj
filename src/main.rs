@@ -2,6 +2,7 @@ mod commands;
 mod config;
 mod frecency;
 mod github;
+mod multiplexer;
 mod projects;
 mod shell;
 mod tui;

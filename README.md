@@ -19,6 +19,7 @@ command.
 - **Hierarchical Tags**: Organize projects with nested tags (e.g., `work/backend`)
 - **Shell Integration**: Automatic directory changing for bash, zsh, fish, and sh
 - **Editor Integration**: Launch your preferred editor when selecting a project
+- **Multiplexer Support**: Automatically opens vim/nvim in a split pane when running inside tmux or cmux
 - **Git Integration**: Prompt to initialize git repositories when adding projects
 - **GitHub Integration**: Optionally create GitHub remotes via the gh CLI
 

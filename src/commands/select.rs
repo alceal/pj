@@ -85,10 +85,12 @@ pub fn run(
             .filter(|e| !e.is_empty())
             .unwrap_or(config.editor);
 
-        Command::new(&editor)
-            .arg(&selected_path)
-            .spawn()
-            .map_err(|e| anyhow::anyhow!("Failed to launch editor '{}': {}", editor, e))?;
+        if !crate::multiplexer::try_open_in_split(&editor, &selected_path) {
+            Command::new(&editor)
+                .arg(&selected_path)
+                .spawn()
+                .map_err(|e| anyhow::anyhow!("Failed to launch editor '{}': {}", editor, e))?;
+        }
     }
 
     // Handle cd output
