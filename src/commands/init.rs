@@ -94,11 +94,34 @@ pub fn run() -> Result<()> {
         git_init_on_add = true;
     }
 
+    let ai_options = vec!["none", "codex", "claude", "gemini", "other"];
+    let ai_selection = match Select::new()
+        .with_prompt("Which AI assistant would you like to use? (Esc to cancel)")
+        .items(&ai_options)
+        .default(0)
+        .interact_opt()?
+    {
+        Some(sel) => sel,
+        None => {
+            eprintln!("Setup cancelled.");
+            return Ok(());
+        }
+    };
+
+    let ai_assistant = if ai_selection == ai_options.len() - 1 {
+        Input::<String>::new()
+            .with_prompt("Enter your AI assistant command")
+            .interact_text()?
+    } else {
+        ai_options[ai_selection].to_string()
+    };
+
     let config = Config {
         editor,
         cd_on_select,
         git_init_on_add,
         gh_create_on_add,
+        ai_assistant,
     };
 
     config.save()?;

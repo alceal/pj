@@ -31,7 +31,7 @@ fn open_in_tmux_split(editor: &str, path: &Path) -> Result<(), String> {
     let cmd = format!("{} \"{}\"", editor, path_str);
 
     Command::new("tmux")
-        .args(["split-window", "-h", &cmd])
+        .args(["split-window", "-h", "-d", &cmd])
         .status()
         .map_err(|e| format!("Failed to run tmux split-window: {}", e))?;
 

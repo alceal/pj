@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-03-22
+
+### Added
+
+- AI assistant integration: new `ai_assistant` config setting to launch codex, claude, gemini, or a custom AI assistant when selecting a project
+- CLI flags `--ai <AI_ASSISTANT>` and `--no-ai` to override the configured AI assistant per invocation
+- AI assistant selection in setup wizard (`pj --init`) and config editor (`pj --config`)
+- Shell functions updated to support AI assistant launch protocol
+
+### Fixed
+
+- tmux split now opens in detached mode (`-d` flag) so cursor stays on the original pane
+
 ## [0.2.6] - 2026-03-15
 
 ### Added

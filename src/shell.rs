@@ -59,13 +59,24 @@ pj() {
             return $?
             ;;
     esac
-    local result
-    result=$(command pj "$@")
+    local output
+    output=$(command pj "$@")
     local exit_code=$?
-    if [[ $exit_code -eq 0 && -d "$result" ]]; then
-        builtin cd "$result"
-    elif [[ $exit_code -ne 130 && -n "$result" ]]; then
-        echo "$result"
+    local dir="" ai_cmd=""
+    while IFS= read -r line; do
+        if [[ "$line" == __PJ_AI__:* ]]; then
+            ai_cmd="${line#__PJ_AI__:}"
+        else
+            dir="$line"
+        fi
+    done <<< "$output"
+    if [[ $exit_code -eq 0 && -n "$dir" && -d "$dir" ]]; then
+        builtin cd "$dir"
+    elif [[ $exit_code -ne 130 && -n "$dir" ]]; then
+        echo "$dir"
+    fi
+    if [[ $exit_code -eq 0 && -n "$ai_cmd" ]]; then
+        eval "$ai_cmd"
     fi
 }
 "#
@@ -80,12 +91,26 @@ pj() {
             return $?
             ;;
     esac
-    result=$(command pj "$@")
+    output=$(command pj "$@")
     exit_code=$?
-    if [ $exit_code -eq 0 ] && [ -d "$result" ]; then
-        cd "$result"
-    elif [ $exit_code -ne 130 ] && [ -n "$result" ]; then
-        echo "$result"
+    dir="" ai_cmd=""
+    _pj_ifs="$IFS"
+    IFS='
+'
+    for line in $output; do
+        case "$line" in
+            __PJ_AI__:*) ai_cmd="${line#__PJ_AI__:}" ;;
+            *) dir="$line" ;;
+        esac
+    done
+    IFS="$_pj_ifs"
+    if [ $exit_code -eq 0 ] && [ -n "$dir" ] && [ -d "$dir" ]; then
+        cd "$dir"
+    elif [ $exit_code -ne 130 ] && [ -n "$dir" ]; then
+        echo "$dir"
+    fi
+    if [ $exit_code -eq 0 ] && [ -n "$ai_cmd" ]; then
+        eval "$ai_cmd"
     fi
 }
 "#
@@ -99,12 +124,24 @@ function pj
             command pj $argv
             return $status
     end
-    set -l result (command pj $argv)
+    set -l output (command pj $argv)
     set -l exit_code $status
-    if test $exit_code -eq 0 -a -d "$result"
-        cd $result
-    else if test $exit_code -ne 130 -a -n "$result"
-        echo $result
+    set -l dir ""
+    set -l ai_cmd ""
+    for line in $output
+        if string match -q "__PJ_AI__:*" $line
+            set ai_cmd (string replace "__PJ_AI__:" "" $line)
+        else
+            set dir $line
+        end
+    end
+    if test $exit_code -eq 0 -a -n "$dir" -a -d "$dir"
+        cd $dir
+    else if test $exit_code -ne 130 -a -n "$dir"
+        echo $dir
+    end
+    if test $exit_code -eq 0 -a -n "$ai_cmd"
+        eval $ai_cmd
     end
 end
 "#

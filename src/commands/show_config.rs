@@ -11,12 +11,17 @@ use std::io::Write;
 use crate::config::Config;
 
 const EDITOR_OPTIONS: &[&str] = &["none", "code", "zed", "vim", "nvim", "cursor", "nano", "emacs"];
+const AI_OPTIONS: &[&str] = &["none", "codex", "claude", "gemini"];
+
+const NUM_ROWS: usize = 5;
 
 struct ConfigEditor {
     config: Config,
     selected_row: usize,
     editor_index: usize,
     custom_editor: Option<String>,
+    ai_index: usize,
+    custom_ai: Option<String>,
 }
 
 impl ConfigEditor {
@@ -30,11 +35,22 @@ impl ConfigEditor {
             (EDITOR_OPTIONS.len(), Some(config.editor.clone()))
         };
 
+        let (ai_index, custom_ai) = if let Some(idx) = AI_OPTIONS
+            .iter()
+            .position(|&a| a == config.ai_assistant)
+        {
+            (idx, None)
+        } else {
+            (AI_OPTIONS.len(), Some(config.ai_assistant.clone()))
+        };
+
         Self {
             config,
             selected_row: 0,
             editor_index,
             custom_editor,
+            ai_index,
+            custom_ai,
         }
     }
 
@@ -51,22 +67,36 @@ impl ConfigEditor {
         }
     }
 
+    fn cycle_ai(&mut self, forward: bool) {
+        let max_index = AI_OPTIONS.len();
+        if forward {
+            self.ai_index = (self.ai_index + 1) % (max_index + 1);
+        } else {
+            if self.ai_index == 0 {
+                self.ai_index = max_index;
+            } else {
+                self.ai_index -= 1;
+            }
+        }
+    }
+
     fn cycle_current(&mut self, forward: bool) {
         match self.selected_row {
             0 => self.cycle_editor(forward),
             1 => self.config.cd_on_select = !self.config.cd_on_select,
             2 => self.config.git_init_on_add = !self.config.git_init_on_add,
             3 => self.config.gh_create_on_add = !self.config.gh_create_on_add,
+            4 => self.cycle_ai(forward),
             _ => {}
         }
     }
 
     fn move_selection(&mut self, down: bool) {
         if down {
-            self.selected_row = (self.selected_row + 1) % 4;
+            self.selected_row = (self.selected_row + 1) % NUM_ROWS;
         } else {
             if self.selected_row == 0 {
-                self.selected_row = 3;
+                self.selected_row = NUM_ROWS - 1;
             } else {
                 self.selected_row -= 1;
             }
@@ -90,6 +120,7 @@ impl ConfigEditor {
             ("cd_on_select", self.config.cd_on_select.to_string()),
             ("git_init_on_add", self.config.git_init_on_add.to_string()),
             ("gh_create_on_add", self.config.gh_create_on_add.to_string()),
+            ("ai_assistant", self.format_ai_value()),
         ];
 
         for (i, (name, value)) in rows.iter().enumerate() {
@@ -135,6 +166,14 @@ impl ConfigEditor {
         }
     }
 
+    fn format_ai_value(&self) -> String {
+        if self.ai_index < AI_OPTIONS.len() {
+            AI_OPTIONS[self.ai_index].to_string()
+        } else {
+            format!("custom: {}", self.custom_ai.as_deref().unwrap_or(""))
+        }
+    }
+
     fn build_config(&self) -> Config {
         let editor = if self.editor_index < EDITOR_OPTIONS.len() {
             EDITOR_OPTIONS[self.editor_index].to_string()
@@ -142,21 +181,28 @@ impl ConfigEditor {
             self.custom_editor.clone().unwrap_or_default()
         };
 
+        let ai_assistant = if self.ai_index < AI_OPTIONS.len() {
+            AI_OPTIONS[self.ai_index].to_string()
+        } else {
+            self.custom_ai.clone().unwrap_or_default()
+        };
+
         Config {
             editor,
             cd_on_select: self.config.cd_on_select,
             git_init_on_add: self.config.git_init_on_add,
             gh_create_on_add: self.config.gh_create_on_add,
+            ai_assistant,
         }
     }
 }
 
-fn prompt_custom_editor<W: Write>(out: &mut W) -> Result<Option<String>> {
+fn prompt_custom_input<W: Write>(out: &mut W, label: &str) -> Result<Option<String>> {
     execute!(
         out,
-        MoveTo(0, 7),
+        MoveTo(0, 8),
         Clear(ClearType::FromCursorDown),
-        Print("\nEnter custom editor command: "),
+        Print(format!("\nEnter custom {} command: ", label)),
         Show
     )?;
     out.flush()?;
@@ -223,8 +269,15 @@ fn run_editor_loop<W: Write>(
                 KeyCode::Enter => {
                     // If on editor row and it's custom, prompt for input
                     if editor.selected_row == 0 && editor.editor_index >= EDITOR_OPTIONS.len() {
-                        if let Some(custom) = prompt_custom_editor(out)? {
+                        if let Some(custom) = prompt_custom_input(out, "editor")? {
                             editor.custom_editor = Some(custom);
+                        }
+                        continue;
+                    }
+                    // If on AI row and it's custom, prompt for input
+                    if editor.selected_row == 4 && editor.ai_index >= AI_OPTIONS.len() {
+                        if let Some(custom) = prompt_custom_input(out, "AI assistant")? {
+                            editor.custom_ai = Some(custom);
                         }
                         continue;
                     }
