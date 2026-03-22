@@ -10,6 +10,12 @@ pub struct Config {
     pub git_init_on_add: bool,
     #[serde(default)]
     pub gh_create_on_add: bool,
+    #[serde(default = "default_ai_assistant")]
+    pub ai_assistant: String,
+}
+
+fn default_ai_assistant() -> String {
+    "none".to_string()
 }
 
 impl Default for Config {
@@ -19,6 +25,7 @@ impl Default for Config {
             cd_on_select: true,
             git_init_on_add: true,
             gh_create_on_add: false,
+            ai_assistant: "none".to_string(),
         }
     }
 }

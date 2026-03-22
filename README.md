@@ -19,6 +19,7 @@ command.
 - **Hierarchical Tags**: Organize projects with nested tags (e.g., `work/backend`)
 - **Shell Integration**: Automatic directory changing for bash, zsh, fish, and sh
 - **Editor Integration**: Launch your preferred editor when selecting a project
+- **AI Assistant Integration**: Optionally launch codex, claude, gemini, or a custom AI assistant when opening a project
 - **Multiplexer Support**: Automatically opens vim/nvim in a split pane when running inside tmux or cmux
 - **Git Integration**: Prompt to initialize git repositories when adding projects
 - **GitHub Integration**: Optionally create GitHub remotes via the gh CLI
@@ -91,6 +92,8 @@ pj
 | `--rm-tags <TAGS>` | Remove tags from project(s) |
 | `-e, --editor <EDITOR>` | Override the configured editor |
 | `--no-editor` | Skip opening editor (just cd if enabled) |
+| `--ai <AI_ASSISTANT>` | Override the configured AI assistant |
+| `--no-ai` | Skip opening AI assistant |
 | `--cd` / `--no-cd` | Override directory change behavior |
 
 ### Examples
@@ -105,6 +108,9 @@ pj my-project
 
 # Open project with a different editor
 pj -e zed
+
+# Open project with an AI assistant
+pj --ai claude
 
 # List all tracked projects
 pj --list
@@ -125,6 +131,7 @@ editor = "code"           # Editor command to launch
 cd_on_select = true       # Change directory when selecting a project
 git_init_on_add = true    # Prompt to initialize git when adding a project
 gh_create_on_add = false  # Create GitHub remote when adding (requires gh CLI)
+ai_assistant = "none"     # AI assistant to launch (none, codex, claude, gemini, or custom command)
 ```
 
 Project data is stored in `~/.pj/projects.json`.

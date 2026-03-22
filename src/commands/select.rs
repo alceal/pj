@@ -6,10 +6,16 @@ use crate::config::Config;
 use crate::projects::ProjectStore;
 use crate::tui::{filter_projects, select_project, SelectionResult};
 
+fn shell_escape(path: &std::path::Path) -> String {
+    let s = path.display().to_string();
+    format!("'{}'", s.replace('\'', "'\\''"))
+}
+
 pub fn run(
     filters: Vec<String>,
     editor_override: Option<String>,
     cd_override: Option<bool>,
+    ai_override: Option<String>,
 ) -> Result<()> {
     let config = Config::load()?;
     let mut store = ProjectStore::load()?;
@@ -97,6 +103,26 @@ pub fn run(
     let should_cd = cd_override.unwrap_or(config.cd_on_select);
     if should_cd {
         println!("{}", selected_path.display());
+    }
+
+    // Handle AI assistant output
+    let should_open_ai = match &ai_override {
+        Some(a) if a.is_empty() => false,
+        _ => true,
+    };
+
+    if should_open_ai {
+        let ai = ai_override
+            .filter(|a| !a.is_empty())
+            .unwrap_or(config.ai_assistant);
+
+        if ai != "none" {
+            println!(
+                "__PJ_AI__:cd {} && {}",
+                shell_escape(&selected_path),
+                ai
+            );
+        }
     }
 
     Ok(())

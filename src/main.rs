@@ -48,6 +48,14 @@ struct Cli {
     #[arg(long = "no-editor")]
     no_editor: bool,
 
+    /// Override AI assistant for this invocation
+    #[arg(long = "ai", value_name = "AI_ASSISTANT")]
+    ai: Option<String>,
+
+    /// Don't open AI assistant
+    #[arg(long = "no-ai", conflicts_with = "ai")]
+    no_ai: bool,
+
     /// Force cd to selected project
     #[arg(long = "cd", conflicts_with = "no_cd")]
     force_cd: bool,
@@ -111,7 +119,12 @@ fn main() {
         } else {
             cli.editor
         };
-        commands::select::run(cli.filters, editor_override, cd_override)
+        let ai_override = if cli.no_ai {
+            Some(String::new())
+        } else {
+            cli.ai
+        };
+        commands::select::run(cli.filters, editor_override, cd_override, ai_override)
     };
 
     if let Err(e) = result {
