@@ -149,9 +149,17 @@ end
         }
     }
 
+    fn end_marker(&self) -> &'static str {
+        match self {
+            Shell::Fish => "end\n",
+            _ => "}\n",
+        }
+    }
+
     pub fn install_function(&self) -> Result<()> {
         let rc_file = self.rc_file()?;
         let function_code = self.function_code();
+        let marker = "# pj - Project Launcher shell integration";
 
         if let Some(parent) = rc_file.parent() {
             if !parent.exists() {
@@ -161,8 +169,20 @@ end
 
         if rc_file.exists() {
             let content = fs::read_to_string(&rc_file)?;
-            if content.contains("# pj - Project Launcher shell integration") {
-                return Ok(());
+            if let Some(start) = content.find(marker) {
+                // Find the end of the existing function
+                let after_marker = &content[start..];
+                let end_marker = self.end_marker();
+                if let Some(end_offset) = after_marker.rfind(end_marker) {
+                    let end = start + end_offset + end_marker.len();
+                    let mut new_content = String::new();
+                    new_content.push_str(&content[..start]);
+                    new_content.push_str(function_code.trim());
+                    new_content.push('\n');
+                    new_content.push_str(&content[end..]);
+                    fs::write(&rc_file, new_content)?;
+                    return Ok(());
+                }
             }
         }
 

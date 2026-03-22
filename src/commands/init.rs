@@ -130,10 +130,10 @@ pub fn run() -> Result<()> {
         Config::config_path()?.display()
     );
 
-    if cd_on_select {
+    if cd_on_select || config.ai_assistant != "none" {
         let shell = shell.unwrap_or(Shell::Bash);
         shell.install_function()?;
-        eprintln!("Shell function added to {}", shell.rc_file()?.display());
+        eprintln!("Shell function installed to {}", shell.rc_file()?.display());
         eprintln!(
             "Please restart your shell or run: source {}",
             shell.rc_file()?.display()
