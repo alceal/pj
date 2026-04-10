@@ -54,7 +54,7 @@ impl Shell {
 # pj - Project Launcher shell integration
 pj() {
     case "$1" in
-        -a|--add|-i|--init|--config|-h|--help|-V|--version)
+        -a|--add|-i|--init|--config|--list|-h|--help|-V|--version)
             command pj "$@"
             return $?
             ;;
@@ -86,7 +86,7 @@ pj() {
 # pj - Project Launcher shell integration
 pj() {
     case "$1" in
-        -a|--add|-i|--init|--config|-h|--help|-V|--version)
+        -a|--add|-i|--init|--config|--list|-h|--help|-V|--version)
             command pj "$@"
             return $?
             ;;
@@ -120,7 +120,7 @@ pj() {
 # pj - Project Launcher shell integration
 function pj
     switch $argv[1]
-        case -a --add -i --init --config -h --help -V --version
+        case -a --add -i --init --config --list -h --help -V --version
             command pj $argv
             return $status
     end
