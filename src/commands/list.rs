@@ -1,6 +1,12 @@
+use std::path::Path;
+
 use anyhow::Result;
 use chrono::{DateTime, Local, Utc};
-use tabled::{Table, Tabled};
+use crossterm::terminal;
+use tabled::{
+    settings::{peaker::PriorityMax, Width},
+    Table, Tabled,
+};
 
 use crate::projects::ProjectStore;
 
@@ -16,6 +22,15 @@ struct ProjectRow {
     last_accessed: String,
     #[tabled(rename = "STATUS")]
     status: String,
+}
+
+fn shorten_path(path: &Path) -> String {
+    if let Some(home) = dirs::home_dir() {
+        if let Ok(stripped) = path.strip_prefix(&home) {
+            return format!("~/{}", stripped.display());
+        }
+    }
+    path.display().to_string()
 }
 
 pub fn run() -> Result<()> {
@@ -36,7 +51,7 @@ pub fn run() -> Result<()> {
                 .unwrap_or_else(|| "Unknown".to_string());
 
             ProjectRow {
-                path: p.path.display().to_string(),
+                path: shorten_path(&p.path),
                 tags: p.tags.join(", "),
                 access_count: p.access_count,
                 last_accessed: dt,
@@ -49,7 +64,16 @@ pub fn run() -> Result<()> {
         })
         .collect();
 
-    let table = Table::new(rows).to_string();
+    let mut table = Table::new(rows);
+
+    if let Ok((width, _)) = terminal::size() {
+        table.with(
+            Width::truncate(width as usize)
+                .suffix("..")
+                .priority(PriorityMax::right()),
+        );
+    }
+
     println!("{}", table);
 
     Ok(())
