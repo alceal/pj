@@ -82,7 +82,8 @@ pub fn run() -> Result<()> {
 
     let max_path_width = terminal::size()
         .map(|(w, _)| (w as usize).saturating_sub(overhead))
-        .unwrap_or(usize::MAX);
+        .unwrap_or(50)
+        .min(50);
 
     let rows: Vec<ProjectRow> = projects
         .iter()
