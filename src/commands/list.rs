@@ -3,10 +3,7 @@ use std::path::Path;
 use anyhow::Result;
 use chrono::{DateTime, Local, Utc};
 use crossterm::terminal;
-use tabled::{
-    settings::{peaker::PriorityMax, Width},
-    Table, Tabled,
-};
+use tabled::{Table, Tabled};
 
 use crate::projects::ProjectStore;
 
@@ -24,13 +21,36 @@ struct ProjectRow {
     status: String,
 }
 
-fn shorten_path(path: &Path) -> String {
-    if let Some(home) = dirs::home_dir() {
+fn shorten_path(path: &Path, max_width: usize) -> String {
+    let full = if let Some(home) = dirs::home_dir() {
         if let Ok(stripped) = path.strip_prefix(&home) {
-            return format!("~/{}", stripped.display());
+            format!("~/{}", stripped.display())
+        } else {
+            path.display().to_string()
+        }
+    } else {
+        path.display().to_string()
+    };
+
+    if full.len() <= max_width {
+        return full;
+    }
+
+    if let Some(rest) = full.strip_prefix("~/") {
+        let components: Vec<&str> = rest.split('/').collect();
+        if components.len() >= 2 {
+            for n in (1..components.len()).rev() {
+                let tail = components[components.len() - n..].join("/");
+                let shortened = format!("~/.../{}",  tail);
+                if shortened.len() <= max_width {
+                    return shortened;
+                }
+            }
+            return format!("~/.../{}",  components.last().unwrap());
         }
     }
-    path.display().to_string()
+
+    full
 }
 
 pub fn run() -> Result<()> {
@@ -43,6 +63,27 @@ pub fn run() -> Result<()> {
         return Ok(());
     }
 
+    let tags_width = projects
+        .iter()
+        .map(|p| p.tags.join(", ").len())
+        .max()
+        .unwrap_or(0)
+        .max(4);
+
+    let access_width = projects
+        .iter()
+        .map(|p| p.access_count.to_string().len())
+        .max()
+        .unwrap_or(0)
+        .max(6);
+
+    // 6 borders + 5 columns * 2 padding + fixed columns (LAST ACCESSED=16, STATUS=7)
+    let overhead = 16 + tags_width + access_width + 16 + 7;
+
+    let max_path_width = terminal::size()
+        .map(|(w, _)| (w as usize).saturating_sub(overhead))
+        .unwrap_or(usize::MAX);
+
     let rows: Vec<ProjectRow> = projects
         .iter()
         .map(|p| {
@@ -51,7 +92,7 @@ pub fn run() -> Result<()> {
                 .unwrap_or_else(|| "Unknown".to_string());
 
             ProjectRow {
-                path: shorten_path(&p.path),
+                path: shorten_path(&p.path, max_path_width),
                 tags: p.tags.join(", "),
                 access_count: p.access_count,
                 last_accessed: dt,
@@ -64,16 +105,7 @@ pub fn run() -> Result<()> {
         })
         .collect();
 
-    let mut table = Table::new(rows);
-
-    if let Ok((width, _)) = terminal::size() {
-        table.with(
-            Width::truncate(width as usize)
-                .suffix("..")
-                .priority(PriorityMax::right()),
-        );
-    }
-
+    let table = Table::new(rows);
     println!("{}", table);
 
     Ok(())
