@@ -79,6 +79,21 @@ fn open_in_cmux_split(editor: &str, path: &Path) -> Result<(), String> {
     Ok(())
 }
 
+pub fn rename_window(path: &Path) {
+    match detect_multiplexer() {
+        Some(Multiplexer::Tmux) => {}
+        // TODO: cmux window rename — command unknown
+        Some(Multiplexer::Cmux) | None => return,
+    }
+
+    let name: String = match path.file_name().and_then(|n| n.to_str()) {
+        Some(n) if !n.is_empty() => n.chars().take(50).collect(),
+        _ => return,
+    };
+
+    let _ = Command::new("tmux").args(["rename-window", &name]).status();
+}
+
 pub fn try_open_in_split(editor: &str, path: &Path) -> bool {
     if !is_terminal_editor(editor) {
         return false;

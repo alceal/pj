@@ -80,6 +80,8 @@ pub fn run(
     }
     store.save()?;
 
+    crate::multiplexer::rename_window(&selected_path);
+
     // Handle editor
     let should_open_editor = match &editor_override {
         Some(e) if e.is_empty() => false, // --no-editor was used
@@ -106,10 +108,7 @@ pub fn run(
     }
 
     // Handle AI assistant output
-    let should_open_ai = match &ai_override {
-        Some(a) if a.is_empty() => false,
-        _ => true,
-    };
+    let should_open_ai = !matches!(&ai_override, Some(a) if a.is_empty());
 
     if should_open_ai {
         let ai = ai_override
@@ -117,11 +116,7 @@ pub fn run(
             .unwrap_or(config.ai_assistant);
 
         if ai != "none" {
-            println!(
-                "__PJ_AI__:cd {} && {}",
-                shell_escape(&selected_path),
-                ai
-            );
+            println!("__PJ_AI__:cd {} && {}", shell_escape(&selected_path), ai);
         }
     }
 

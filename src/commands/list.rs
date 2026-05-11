@@ -41,12 +41,12 @@ fn shorten_path(path: &Path, max_width: usize) -> String {
         if components.len() >= 2 {
             for n in (1..components.len()).rev() {
                 let tail = components[components.len() - n..].join("/");
-                let shortened = format!("~/.../{}",  tail);
+                let shortened = format!("~/.../{}", tail);
                 if shortened.len() <= max_width {
                     return shortened;
                 }
             }
-            return format!("~/.../{}",  components.last().unwrap());
+            return format!("~/.../{}", components.last().unwrap());
         }
     }
 
@@ -88,7 +88,11 @@ pub fn run() -> Result<()> {
         .iter()
         .map(|p| {
             let dt = DateTime::<Utc>::from_timestamp(p.last_accessed, 0)
-                .map(|dt| dt.with_timezone(&Local).format("%Y-%m-%d %H:%M").to_string())
+                .map(|dt| {
+                    dt.with_timezone(&Local)
+                        .format("%Y-%m-%d %H:%M")
+                        .to_string()
+                })
                 .unwrap_or_else(|| "Unknown".to_string());
 
             ProjectRow {

@@ -77,5 +77,4 @@ impl Config {
             .with_context(|| format!("Failed to write config file: {}", path.display()))?;
         Ok(())
     }
-
 }

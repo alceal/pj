@@ -127,11 +127,7 @@ impl ProjectStore {
     }
 
     pub fn all_tags(&self) -> Vec<String> {
-        let mut tags: Vec<String> = self
-            .projects
-            .iter()
-            .flat_map(|p| p.tags.clone())
-            .collect();
+        let mut tags: Vec<String> = self.projects.iter().flat_map(|p| p.tags.clone()).collect();
         tags.sort();
         tags.dedup();
         tags
