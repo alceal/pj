@@ -95,6 +95,7 @@ pj
 | `--ai <AI_ASSISTANT>` | Override the configured AI assistant |
 | `--no-ai` | Skip opening AI assistant |
 | `--cd` / `--no-cd` | Override directory change behavior |
+| `--non-interactive` | Disable prompts and fuzzy picker; auto-select highest-frecency match |
 
 ### Examples
 
@@ -121,6 +122,31 @@ pj --rm-missing
 # Edit configuration interactively
 pj --config
 ```
+
+## Non-Interactive Mode
+
+For scripts, CI, editor integrations, and any context without a human at the
+terminal, pj can suppress all prompts and the fuzzy picker. Activate via the
+`--non-interactive` flag, the `PJ_NON_INTERACTIVE=1` environment variable, or
+automatically when stderr is not a TTY (e.g., when pj's stderr is redirected).
+Precedence: explicit flag > environment variable > stderr auto-detection.
+
+Behavior per command:
+
+- `pj <filter>` auto-selects the highest-frecency existing match. If no
+  existing project matches, exits with an error.
+- `pj` (no filter) auto-selects the highest-frecency existing project.
+- `pj --init` writes a config from built-in defaults and installs the shell
+  function (no wizard).
+- `pj -a` skips the git-init prompt (uses `git_init_on_add` as the answer)
+  and the GitHub visibility prompt (defaults to **Private**).
+- `pj --rm <filter>` removes every matching project directly. `pj --rm`
+  without a filter errors instead of opening the multi-select picker.
+- `pj -t <tags> <path>` requires both `--tags` and an explicit path.
+- `pj --config` is unavailable; edit `~/.pj/config.toml` directly or run
+  `pj --init --non-interactive` to regenerate defaults.
+
+Truthy values for `PJ_NON_INTERACTIVE`: `1`, `true`, `TRUE`, `yes`, `YES`.
 
 ## Configuration
 

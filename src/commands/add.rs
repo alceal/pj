@@ -26,7 +26,7 @@ fn git_init(path: &Path) -> Result<bool> {
     }
 }
 
-pub fn run(tags: Option<String>) -> Result<()> {
+pub fn run(tags: Option<String>, non_interactive: bool) -> Result<()> {
     let config = Config::load()?;
     let mut store = ProjectStore::load()?;
 
@@ -47,10 +47,14 @@ pub fn run(tags: Option<String>) -> Result<()> {
         eprintln!("Added: {}", canonical_path.display());
 
         if config.git_init_on_add && !is_git_repo(&canonical_path) {
-            let should_init = Confirm::new()
-                .with_prompt("Initialize git repository?")
-                .default(true)
-                .interact()?;
+            let should_init = if non_interactive {
+                true
+            } else {
+                Confirm::new()
+                    .with_prompt("Initialize git repository?")
+                    .default(true)
+                    .interact()?
+            };
 
             if should_init && git_init(&canonical_path)? {
                 eprintln!("Initialized git repository");
@@ -58,7 +62,7 @@ pub fn run(tags: Option<String>) -> Result<()> {
         }
 
         if config.gh_create_on_add && is_git_repo(&canonical_path) {
-            create_github_remote_if_possible(&canonical_path)?;
+            create_github_remote_if_possible(&canonical_path, non_interactive)?;
         }
     } else {
         eprintln!(

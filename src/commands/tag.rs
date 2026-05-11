@@ -45,7 +45,12 @@ fn prompt_for_tags(all_tags: Vec<String>) -> Result<Vec<String>> {
     Ok(tags)
 }
 
-pub fn run(tags: Option<String>, path: Option<PathBuf>, remove: bool) -> Result<()> {
+pub fn run(
+    tags: Option<String>,
+    path: Option<PathBuf>,
+    remove: bool,
+    non_interactive: bool,
+) -> Result<()> {
     let mut store = ProjectStore::load()?;
 
     // Parse tags if provided
@@ -60,6 +65,8 @@ pub fn run(tags: Option<String>, path: Option<PathBuf>, remove: bool) -> Result<
             p.canonicalize().unwrap_or(p)
         };
         vec![resolved]
+    } else if non_interactive {
+        bail!("Non-interactive tag operation requires an explicit path");
     } else {
         // No path: use multi-select
         let projects = store.sorted_by_frecency();
@@ -86,6 +93,9 @@ pub fn run(tags: Option<String>, path: Option<PathBuf>, remove: bool) -> Result<
 
     // Determine tags to apply
     let final_tags = if tags_vec.is_empty() {
+        if non_interactive {
+            bail!("Non-interactive tag operation requires --tags <T1,T2,...>");
+        }
         // No tags provided: prompt for them
         let all_tags = store.all_tags();
         prompt_for_tags(all_tags)?

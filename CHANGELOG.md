@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-05-11
+
+### Added
+
+- `--non-interactive` flag, `PJ_NON_INTERACTIVE=1` environment variable, and stderr-TTY auto-detection to suppress all prompts and the fuzzy picker. Ambiguous filters auto-resolve to the highest-frecency match. Applies to `pj <filter>`, `pj --init`, `pj -a`, `pj --rm`, and `pj -t`. `pj --config` errors in non-interactive mode.
+
 ## [0.3.6] - 2026-05-11
 
 ### Added

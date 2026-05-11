@@ -75,34 +75,55 @@ struct Cli {
     /// Show current configuration
     #[arg(long = "config", conflicts_with_all = ["add", "rm", "rm_missing", "init", "list", "tags", "rm_tags"])]
     config: bool,
+
+    /// Run without interactive prompts or fuzzy picker; auto-resolve ambiguity by frecency
+    #[arg(long = "non-interactive")]
+    non_interactive: bool,
+}
+
+fn resolve_non_interactive(flag: bool) -> bool {
+    use std::io::IsTerminal;
+    if flag {
+        return true;
+    }
+    if std::env::var("PJ_NON_INTERACTIVE")
+        .ok()
+        .as_deref()
+        .map(|v| matches!(v, "1" | "true" | "TRUE" | "yes" | "YES"))
+        .unwrap_or(false)
+    {
+        return true;
+    }
+    !std::io::stderr().is_terminal()
 }
 
 fn main() {
     let cli = Cli::parse();
+    let non_interactive = resolve_non_interactive(cli.non_interactive);
 
     let result = if cli.init {
-        commands::init::run()
+        commands::init::run(non_interactive)
     } else if cli.config {
-        commands::show_config::run()
+        commands::show_config::run(non_interactive)
     } else if cli.list {
         commands::list::run()
     } else if cli.rm {
-        commands::rm::run(false)
+        commands::rm::run(false, &cli.filters, non_interactive)
     } else if cli.rm_missing {
-        commands::rm::run(true)
+        commands::rm::run(true, &[], non_interactive)
     } else if cli.add {
         // -a/--add: Add current directory
         // If -t is also present, those are tags for the new project
         let tags_for_add = cli.tags.flatten();
-        commands::add::run(tags_for_add)
+        commands::add::run(tags_for_add, non_interactive)
     } else if let Some(tags_value) = cli.tags.clone() {
         // --tags without --add: tag management operation
         let path = cli.filters.first().map(PathBuf::from);
-        commands::tag::run(tags_value, path, false)
+        commands::tag::run(tags_value, path, false, non_interactive)
     } else if let Some(tags_value) = cli.rm_tags.clone() {
         // --rm-tags: remove tags operation
         let path = cli.filters.first().map(PathBuf::from);
-        commands::tag::run(tags_value, path, true)
+        commands::tag::run(tags_value, path, true, non_interactive)
     } else {
         // Project selection mode
         let cd_override = if cli.force_cd {
@@ -122,7 +143,13 @@ fn main() {
         } else {
             cli.ai
         };
-        commands::select::run(cli.filters, editor_override, cd_override, ai_override)
+        commands::select::run(
+            cli.filters,
+            editor_override,
+            cd_override,
+            ai_override,
+            non_interactive,
+        )
     };
 
     if let Err(e) = result {

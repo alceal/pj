@@ -16,6 +16,7 @@ pub fn run(
     editor_override: Option<String>,
     cd_override: Option<bool>,
     ai_override: Option<String>,
+    non_interactive: bool,
 ) -> Result<()> {
     let config = Config::load()?;
     let mut store = ProjectStore::load()?;
@@ -37,19 +38,36 @@ pub fn run(
         .collect();
 
     let selected_path = if filters.is_empty() {
-        // No filter: show all projects in skim
-        match select_project(&all_projects, None)? {
-            SelectionResult::Selected(path) => path,
-            SelectionResult::MissingSelected(path) => {
-                handle_missing_project(&mut store, &path)?;
-                std::process::exit(1);
-            }
-            SelectionResult::Cancelled | SelectionResult::MultiSelected(_) => {
-                std::process::exit(130);
+        if non_interactive {
+            let Some(project) = all_projects.iter().find(|p| p.exists()) else {
+                bail!("No existing projects to select in non-interactive mode");
+            };
+            project.path.clone()
+        } else {
+            // No filter: show all projects in skim
+            match select_project(&all_projects, None)? {
+                SelectionResult::Selected(path) => path,
+                SelectionResult::MissingSelected(path) => {
+                    handle_missing_project(&mut store, &path, non_interactive)?;
+                    std::process::exit(1);
+                }
+                SelectionResult::Cancelled | SelectionResult::MultiSelected(_) => {
+                    std::process::exit(130);
+                }
             }
         }
     } else if existing_filtered.len() == 1 {
         // Single match: auto-open silently
+        existing_filtered[0].path.clone()
+    } else if non_interactive {
+        // Zero or multiple matches in non-interactive mode: auto-resolve or bail
+        if existing_filtered.is_empty() {
+            bail!(
+                "No existing projects match filter '{}' in non-interactive mode",
+                filters.join(" ")
+            );
+        }
+        // existing_filtered preserves the frecency order from sorted_by_frecency
         existing_filtered[0].path.clone()
     } else {
         // Zero or multiple matches: show skim with filter pre-populated
@@ -65,7 +83,7 @@ pub fn run(
         match select_project(projects_to_show, Some(&query))? {
             SelectionResult::Selected(path) => path,
             SelectionResult::MissingSelected(path) => {
-                handle_missing_project(&mut store, &path)?;
+                handle_missing_project(&mut store, &path, non_interactive)?;
                 std::process::exit(1);
             }
             SelectionResult::Cancelled | SelectionResult::MultiSelected(_) => {
@@ -123,8 +141,18 @@ pub fn run(
     Ok(())
 }
 
-fn handle_missing_project(store: &mut ProjectStore, path: &std::path::Path) -> Result<()> {
+fn handle_missing_project(
+    store: &mut ProjectStore,
+    path: &std::path::Path,
+    non_interactive: bool,
+) -> Result<()> {
     eprintln!("Project path does not exist: {}", path.display());
+    if non_interactive {
+        eprintln!(
+            "Non-interactive mode: not removing from tracking. Use `pj --rm <filter>` to remove."
+        );
+        return Ok(());
+    }
     let remove = Confirm::new()
         .with_prompt("Remove from tracking?")
         .default(true)
