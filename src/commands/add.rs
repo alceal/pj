@@ -1,22 +1,19 @@
 use anyhow::{Context, Result};
 use dialoguer::Confirm;
 use std::env;
-use std::path::PathBuf;
+use std::path::Path;
 use std::process::Command;
 
 use crate::config::Config;
 use crate::github::create_github_remote_if_possible;
 use crate::projects::{Project, ProjectStore};
 
-fn is_git_repo(path: &PathBuf) -> bool {
+fn is_git_repo(path: &Path) -> bool {
     path.join(".git").exists()
 }
 
-fn git_init(path: &PathBuf) -> Result<bool> {
-    let output = Command::new("git")
-        .arg("init")
-        .current_dir(path)
-        .output();
+fn git_init(path: &Path) -> Result<bool> {
+    let output = Command::new("git").arg("init").current_dir(path).output();
 
     match output {
         Ok(out) if out.status.success() => Ok(true),

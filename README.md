@@ -20,7 +20,7 @@ command.
 - **Shell Integration**: Automatic directory changing for bash, zsh, fish, and sh
 - **Editor Integration**: Launch your preferred editor when selecting a project
 - **AI Assistant Integration**: Optionally launch codex, claude, gemini, or a custom AI assistant when opening a project
-- **Multiplexer Support**: Automatically opens vim/nvim in a split pane when running inside tmux or cmux
+- **Multiplexer Support**: Automatically opens vim/nvim in a split pane and renames the tmux window to the project name when running inside tmux or cmux
 - **Git Integration**: Prompt to initialize git repositories when adding projects
 - **GitHub Integration**: Optionally create GitHub remotes via the gh CLI
 

@@ -74,7 +74,9 @@ pub fn filter_projects<'a>(projects: &[&'a Project], filters: &[String]) -> Vec<
             let searchable = format!("{} {}", path_str, tags_str);
 
             // All filter terms must match (AND logic)
-            filters.iter().all(|filter| fuzzy_match(&searchable, filter))
+            filters
+                .iter()
+                .all(|filter| fuzzy_match(&searchable, filter))
         })
         .copied()
         .collect()
@@ -106,10 +108,7 @@ fn create_project_items(projects: &[&Project]) -> Vec<ProjectItem> {
         .collect()
 }
 
-pub fn select_project(
-    projects: &[&Project],
-    query: Option<&str>,
-) -> Result<SelectionResult> {
+pub fn select_project(projects: &[&Project], query: Option<&str>) -> Result<SelectionResult> {
     let items = create_project_items(projects);
 
     let items: Vec<Arc<dyn SkimItem>> = items
@@ -138,10 +137,7 @@ pub fn select_project(
         Some(out) if out.is_abort => Ok(SelectionResult::Cancelled),
         Some(out) if !out.selected_items.is_empty() => {
             let selected = &out.selected_items[0];
-            let item = (**selected)
-                .as_any()
-                .downcast_ref::<ProjectItem>()
-                .unwrap();
+            let item = (**selected).as_any().downcast_ref::<ProjectItem>().unwrap();
             if item.exists {
                 Ok(SelectionResult::Selected(item.path.clone()))
             } else {

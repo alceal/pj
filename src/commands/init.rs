@@ -15,7 +15,9 @@ pub fn run() -> Result<()> {
         eprintln!("Could not detect shell, defaulting to bash-compatible");
     }
 
-    let editor_options = vec!["none", "code", "zed", "cursor", "nvim", "vim", "nano", "emacs", "other"];
+    let editor_options = vec![
+        "none", "code", "zed", "cursor", "nvim", "vim", "nano", "emacs", "other",
+    ];
     let editor_selection = match Select::new()
         .with_prompt("Which editor would you like to use? (Esc to cancel)")
         .items(&editor_options)
@@ -64,7 +66,7 @@ pub fn run() -> Result<()> {
     };
 
     let should_ask_github =
-        git_init_on_add || existing_config.as_ref().map_or(false, |c| c.git_init_on_add);
+        git_init_on_add || existing_config.as_ref().is_some_and(|c| c.git_init_on_add);
 
     let gh_create_on_add = if should_ask_github {
         let gh_hint = if is_gh_installed() {

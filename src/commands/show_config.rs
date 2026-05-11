@@ -10,7 +10,9 @@ use std::io::Write;
 
 use crate::config::Config;
 
-const EDITOR_OPTIONS: &[&str] = &["none", "code", "zed", "vim", "nvim", "cursor", "nano", "emacs"];
+const EDITOR_OPTIONS: &[&str] = &[
+    "none", "code", "zed", "vim", "nvim", "cursor", "nano", "emacs",
+];
 const AI_OPTIONS: &[&str] = &["none", "codex", "claude", "gemini"];
 
 const NUM_ROWS: usize = 5;
@@ -26,23 +28,19 @@ struct ConfigEditor {
 
 impl ConfigEditor {
     fn new(config: Config) -> Self {
-        let (editor_index, custom_editor) = if let Some(idx) = EDITOR_OPTIONS
-            .iter()
-            .position(|&e| e == config.editor)
-        {
-            (idx, None)
-        } else {
-            (EDITOR_OPTIONS.len(), Some(config.editor.clone()))
-        };
+        let (editor_index, custom_editor) =
+            if let Some(idx) = EDITOR_OPTIONS.iter().position(|&e| e == config.editor) {
+                (idx, None)
+            } else {
+                (EDITOR_OPTIONS.len(), Some(config.editor.clone()))
+            };
 
-        let (ai_index, custom_ai) = if let Some(idx) = AI_OPTIONS
-            .iter()
-            .position(|&a| a == config.ai_assistant)
-        {
-            (idx, None)
-        } else {
-            (AI_OPTIONS.len(), Some(config.ai_assistant.clone()))
-        };
+        let (ai_index, custom_ai) =
+            if let Some(idx) = AI_OPTIONS.iter().position(|&a| a == config.ai_assistant) {
+                (idx, None)
+            } else {
+                (AI_OPTIONS.len(), Some(config.ai_assistant.clone()))
+            };
 
         Self {
             config,
@@ -252,10 +250,7 @@ pub fn run() -> Result<()> {
     Ok(())
 }
 
-fn run_editor_loop<W: Write>(
-    editor: &mut ConfigEditor,
-    out: &mut W,
-) -> Result<Option<Config>> {
+fn run_editor_loop<W: Write>(editor: &mut ConfigEditor, out: &mut W) -> Result<Option<Config>> {
     loop {
         editor.render(out)?;
 

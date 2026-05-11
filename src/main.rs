@@ -95,15 +95,13 @@ fn main() {
         // If -t is also present, those are tags for the new project
         let tags_for_add = cli.tags.flatten();
         commands::add::run(tags_for_add)
-    } else if cli.tags.is_some() {
+    } else if let Some(tags_value) = cli.tags.clone() {
         // --tags without --add: tag management operation
-        let tags_value = cli.tags.unwrap();
-        let path = cli.filters.first().map(|s| PathBuf::from(s));
+        let path = cli.filters.first().map(PathBuf::from);
         commands::tag::run(tags_value, path, false)
-    } else if cli.rm_tags.is_some() {
+    } else if let Some(tags_value) = cli.rm_tags.clone() {
         // --rm-tags: remove tags operation
-        let tags_value = cli.rm_tags.unwrap();
-        let path = cli.filters.first().map(|s| PathBuf::from(s));
+        let path = cli.filters.first().map(PathBuf::from);
         commands::tag::run(tags_value, path, true)
     } else {
         // Project selection mode
