@@ -92,7 +92,7 @@ pub fn create_github_repo(path: &Path, visibility: Visibility) -> Result<()> {
     Ok(())
 }
 
-pub fn create_github_remote_if_possible(path: &Path) -> Result<()> {
+pub fn create_github_remote_if_possible(path: &Path, non_interactive: bool) -> Result<()> {
     if !is_gh_installed() {
         eprintln!("Warning: gh CLI not found. Install from https://cli.github.com");
         eprintln!("         to enable GitHub integration.");
@@ -110,7 +110,11 @@ pub fn create_github_remote_if_possible(path: &Path) -> Result<()> {
         return Ok(());
     }
 
-    let visibility = prompt_visibility()?;
+    let visibility = if non_interactive {
+        Visibility::Private
+    } else {
+        prompt_visibility()?
+    };
 
     create_github_repo(path, visibility)?;
 

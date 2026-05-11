@@ -5,7 +5,7 @@ use crate::config::Config;
 use crate::github::is_gh_installed;
 use crate::shell::Shell;
 
-pub fn run() -> Result<()> {
+pub fn run(non_interactive: bool) -> Result<()> {
     let existing_config = Config::load().ok();
     let shell = Shell::detect();
 
@@ -13,6 +13,31 @@ pub fn run() -> Result<()> {
         eprintln!("Detected shell: {}", s.name());
     } else {
         eprintln!("Could not detect shell, defaulting to bash-compatible");
+    }
+
+    if non_interactive {
+        let config = Config::default();
+        config.save()?;
+        eprintln!(
+            "Configuration saved to {} (defaults: editor={}, cd_on_select={}, git_init_on_add={}, gh_create_on_add={}, ai_assistant={})",
+            Config::config_path()?.display(),
+            config.editor,
+            config.cd_on_select,
+            config.git_init_on_add,
+            config.gh_create_on_add,
+            config.ai_assistant,
+        );
+
+        if config.cd_on_select || config.ai_assistant != "none" {
+            let shell = shell.unwrap_or(Shell::Bash);
+            shell.install_function()?;
+            eprintln!(
+                "Shell function installed to {}. Restart your shell or run: source {}",
+                shell.rc_file()?.display(),
+                shell.rc_file()?.display()
+            );
+        }
+        return Ok(());
     }
 
     let editor_options = vec![

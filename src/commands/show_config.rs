@@ -221,7 +221,13 @@ fn prompt_custom_input<W: Write>(out: &mut W, label: &str) -> Result<Option<Stri
     }
 }
 
-pub fn run() -> Result<()> {
+pub fn run(non_interactive: bool) -> Result<()> {
+    if non_interactive {
+        anyhow::bail!(
+            "`pj --config` is interactive only. Edit ~/.pj/config.toml directly or use `pj --init --non-interactive`."
+        );
+    }
+
     let config = Config::load()?;
     let mut editor = ConfigEditor::new(config);
     let mut stderr = std::io::stderr();
